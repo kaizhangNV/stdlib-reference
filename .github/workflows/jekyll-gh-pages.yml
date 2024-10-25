@@ -30,6 +30,26 @@ jobs:
         uses: actions/checkout@v4
       - name: Setup Pages
         uses: actions/configure-pages@v5
+      - name: Build Slang
+        run: |
+          git clone --recursive https://github.com/kaizhangNV/slang.git
+          pushd slang
+          sudo apt-get install -y ninja-build
+          git checkout doc
+          cmake --preset default
+          cmake --build --preset release
+          popd
+
+      - name: Build Slang Docs
+        run: |
+          rm -rf ./interfaces
+          rm -rf ./types
+          rm -rf ./global-decls
+          rm -rf ./attributes
+          slang/build/Release/bin/slangc -compile-stdlib -doc
+          mv toc.html ./_includes/stdlib-reference-toc.html
+          sudo rm -r slang
+
       - name: Build with Jekyll
         uses: actions/jekyll-build-pages@v1
         with:
